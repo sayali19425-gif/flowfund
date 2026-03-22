@@ -14,99 +14,105 @@ export default function Funder({ wallet, projects, setProjects }) {
   }
 
   const sendXLM = async (toAddress, amount) => {
-    try {
-      // Import Freighter API with correct v3 syntax
-      const freighterModule = await import('@stellar/freighter-api')
-      const freighter = freighterModule.default || freighterModule
+  try {
+    const freighterModule = await import('@stellar/freighter-api')
+    const freighter = freighterModule.default || freighterModule
 
-      // Check connection
-      const connResult = await freighter.isConnected()
-      console.log('isConnected:', connResult)
-      if (!connResult?.isConnected) {
-        showToast('Freighter not connected! Please unlock Freighter.', 'error')
-        return false
-      }
-
-      // Request access
-      const accessResult = await freighter.requestAccess()
-      console.log('requestAccess:', accessResult)
-      if (accessResult?.error) {
-        showToast('Access denied: ' + accessResult.error, 'error')
-        return false
-      }
-
-      // Get address using getAddress (v3 API)
-      const addrResult = await freighter.getAddress()
-      console.log('getAddress:', addrResult)
-      const publicKey = addrResult?.address
-
-      if (!publicKey) {
-        showToast('Could not get wallet address from Freighter.', 'error')
-        return false
-      }
-
-      showToast('Building transaction...')
-
-      // Build Stellar transaction
-      const server = new StellarSdk.Horizon.Server('https://horizon-testnet.stellar.org')
-      const sourceAccount = await server.loadAccount(publicKey)
-      const baseFee = await server.fetchBaseFee()
-
-      const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
-        fee: baseFee.toString(),
-        networkPassphrase: StellarSdk.Networks.TESTNET,
-      })
-        .addOperation(
-          StellarSdk.Operation.payment({
-            destination: toAddress,
-            asset: StellarSdk.Asset.native(),
-            amount: amount.toFixed(7),
-          })
-        )
-        .addMemo(StellarSdk.Memo.text('FlowFund payment'))
-        .setTimeout(30)
-        .build()
-
-      showToast('Please confirm in Freighter popup...')
-
-      // Sign with Freighter v3
-      const signResult = await freighter.signTransaction(
-        transaction.toXDR(),
-        {
-          networkPassphrase: StellarSdk.Networks.TESTNET,
-          address: publicKey,
-        }
-      )
-
-      console.log('signTransaction:', signResult)
-
-      if (signResult?.error) {
-        showToast('Transaction rejected: ' + signResult.error, 'error')
-        return false
-      }
-
-      // Get signed XDR
-      const signedXDR = signResult?.signedTxXdr || signResult
-
-      // Submit to Stellar network
-      const signedTx = StellarSdk.TransactionBuilder.fromXDR(
-        signedXDR,
-        StellarSdk.Networks.TESTNET
-      )
-      const result = await server.submitTransaction(signedTx)
-      showToast('XLM sent! TX: ' + result.hash.slice(0, 20) + '...')
-      return true
-
-    } catch (err) {
-      console.error('Full error:', err)
-      if (err.message?.includes('cancel') || err.message?.includes('decline')) {
-        showToast('Transaction cancelled.', 'error')
-      } else {
-        showToast('Error: ' + (err.message || 'Transaction failed'), 'error')
-      }
+    // Check connection
+    const connResult = await freighter.isConnected()
+    if (!connResult?.isConnected) {
+      showToast('Freighter not connected!', 'error')
       return false
     }
+
+    // Get address
+    const addrResult = await freighter.getAddress()
+    const publicKey = addrResult?.address
+    if (!publicKey) {
+      showToast('Could not get wallet address.', 'error')
+      return false
+    }
+
+    console.log('Sending from:', publicKey)
+    console.log('Sending to:', toAddress)
+    console.log('Amount:', amount)
+
+    showToast('Building transaction...')
+
+    const server = new StellarSdk.Horizon.Server(
+      'https://horizon-testnet.stellar.org'
+    )
+
+    // Load account
+    const sourceAccount = await server.loadAccount(publicKey)
+    console.log('Account loaded:', sourceAccount.accountId())
+
+    // Use fixed fee
+    const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+      fee: '100',
+      networkPassphrase: StellarSdk.Networks.TESTNET,
+    })
+      .addOperation(
+        StellarSdk.Operation.payment({
+          destination: toAddress,
+          asset: StellarSdk.Asset.native(),
+          amount: String(amount),
+        })
+      )
+      .setTimeout(180)
+      .build()
+
+    console.log('Transaction built, XDR:', transaction.toXDR().slice(0, 50))
+
+    showToast('Please confirm in Freighter...')
+
+    // Sign with Freighter
+    const signResult = await freighter.signTransaction(
+      transaction.toXDR(),
+      {
+        networkPassphrase: StellarSdk.Networks.TESTNET,
+        address: publicKey,
+      }
+    )
+
+    console.log('Signed:', signResult)
+
+    if (signResult?.error) {
+      showToast('Signing failed: ' + signResult.error, 'error')
+      return false
+    }
+
+    const signedXDR = signResult?.signedTxXdr || signResult
+
+    // Submit transaction
+    const signedTx = StellarSdk.TransactionBuilder.fromXDR(
+      signedXDR,
+      StellarSdk.Networks.TESTNET
+    )
+
+    showToast('Submitting transaction...')
+    const result = await server.submitTransaction(signedTx)
+    console.log('Transaction hash:', result.hash)
+
+    showToast('XLM sent! TX: ' + result.hash.slice(0, 16) + '...')
+    return true
+
+  } catch (err) {
+    console.error('Full error:', err)
+
+    // Get detailed error from Stellar
+    if (err?.response?.data?.extras?.result_codes) {
+      const codes = err.response.data.extras.result_codes
+      console.error('Result codes:', codes)
+      showToast('Transaction error: ' + JSON.stringify(codes), 'error')
+    } else if (err.message?.includes('cancel') || err.message?.includes('decline')) {
+      showToast('Transaction cancelled.', 'error')
+    } else {
+      showToast('Error: ' + (err.message || 'Failed'), 'error')
+    }
+    return false
   }
+}
 
   const handleApprove = (projId, mIdx) => {
     const project = projects.find(p => p.id === projId)
