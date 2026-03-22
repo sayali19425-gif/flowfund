@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { isConnected, requestAccess, getPublicKey, signTransaction } from '@stellar/freighter-api'
 import * as StellarSdk from '@stellar/stellar-sdk'
 import MilestoneCard from '../components/MilestoneCard'
 
@@ -16,31 +15,33 @@ export default function Funder({ wallet, projects, setProjects }) {
 
   const sendXLM = async (toAddress, amount) => {
     try {
-      // Freighter v5+ check
-      const connectionResult = await isConnected()
-      console.log('isConnected:', connectionResult)
+      // Import Freighter API with correct v3 syntax
+      const freighterModule = await import('@stellar/freighter-api')
+      const freighter = freighterModule.default || freighterModule
 
-      const connected = connectionResult?.isConnected ?? connectionResult
-      if (!connected) {
-        showToast('Freighter not connected! Please open and unlock Freighter.', 'error')
+      // Check connection
+      const connResult = await freighter.isConnected()
+      console.log('isConnected:', connResult)
+      if (!connResult?.isConnected) {
+        showToast('Freighter not connected! Please unlock Freighter.', 'error')
         return false
       }
 
       // Request access
-      const accessResult = await requestAccess()
+      const accessResult = await freighter.requestAccess()
       console.log('requestAccess:', accessResult)
       if (accessResult?.error) {
-        showToast('Freighter access denied: ' + accessResult.error, 'error')
+        showToast('Access denied: ' + accessResult.error, 'error')
         return false
       }
 
-      // Get public key
-      const keyResult = await getPublicKey()
-      console.log('getPublicKey:', keyResult)
-      const publicKey = keyResult?.publicKey || keyResult
+      // Get address using getAddress (v3 API)
+      const addrResult = await freighter.getAddress()
+      console.log('getAddress:', addrResult)
+      const publicKey = addrResult?.address
 
-      if (!publicKey || typeof publicKey !== 'string') {
-        showToast('Could not get public key from Freighter.', 'error')
+      if (!publicKey) {
+        showToast('Could not get wallet address from Freighter.', 'error')
         return false
       }
 
@@ -68,11 +69,14 @@ export default function Funder({ wallet, projects, setProjects }) {
 
       showToast('Please confirm in Freighter popup...')
 
-      // Sign with Freighter v5+
-      const signResult = await signTransaction(transaction.toXDR(), {
-        networkPassphrase: StellarSdk.Networks.TESTNET,
-        address: publicKey,
-      })
+      // Sign with Freighter v3
+      const signResult = await freighter.signTransaction(
+        transaction.toXDR(),
+        {
+          networkPassphrase: StellarSdk.Networks.TESTNET,
+          address: publicKey,
+        }
+      )
 
       console.log('signTransaction:', signResult)
 
@@ -81,7 +85,7 @@ export default function Funder({ wallet, projects, setProjects }) {
         return false
       }
 
-      // Get signed XDR — v5 returns object with signedTxXdr
+      // Get signed XDR
       const signedXDR = signResult?.signedTxXdr || signResult
 
       // Submit to Stellar network
@@ -95,10 +99,8 @@ export default function Funder({ wallet, projects, setProjects }) {
 
     } catch (err) {
       console.error('Full error:', err)
-      if (err.message?.includes('cancel') || err.message?.includes('declined')) {
-        showToast('Transaction cancelled by user.', 'error')
-      } else if (err.message?.includes('no source account')) {
-        showToast('Account not found. Fund your testnet account first.', 'error')
+      if (err.message?.includes('cancel') || err.message?.includes('decline')) {
+        showToast('Transaction cancelled.', 'error')
       } else {
         showToast('Error: ' + (err.message || 'Transaction failed'), 'error')
       }
@@ -110,12 +112,7 @@ export default function Funder({ wallet, projects, setProjects }) {
     const project = projects.find(p => p.id === projId)
     if (!project) return
     const xlmAmount = Number((project.totalXLM / project.milestones.length).toFixed(2))
-    setFundModal({
-      projId,
-      mIdx,
-      creatorAddress: project.creator,
-      amount: xlmAmount
-    })
+    setFundModal({ projId, mIdx, creatorAddress: project.creator, amount: xlmAmount })
   }
 
   const confirmFund = async () => {
@@ -123,9 +120,7 @@ export default function Funder({ wallet, projects, setProjects }) {
     const { projId, mIdx, creatorAddress, amount } = fundModal
     setFundModal(null)
     setSending(true)
-
     const success = await sendXLM(creatorAddress, amount)
-
     if (success) {
       setProjects(ps => ps.map(p => {
         if (p.id !== projId) return p
@@ -133,12 +128,7 @@ export default function Funder({ wallet, projects, setProjects }) {
           i !== mIdx ? m : { ...m, status: 'approved' }
         )
         const allDone = updated.every(m => m.status === 'approved')
-        return {
-          ...p,
-          milestones: updated,
-          funded: allDone,
-          completedAt: allDone ? new Date().toISOString().slice(0, 10) : null
-        }
+        return { ...p, milestones: updated, funded: allDone, completedAt: allDone ? new Date().toISOString().slice(0, 10) : null }
       }))
       setSelected(p => p ? {
         ...p,
@@ -165,7 +155,7 @@ export default function Funder({ wallet, projects, setProjects }) {
         i !== mIdx ? m : { ...m, status: 'rejected' }
       )
     } : p)
-    showToast('Milestone rejected — creator can resubmit.', 'error')
+    showToast('Milestone rejected.', 'error')
   }
 
   const pendingProjects = projects.filter(p => !p.funded)
@@ -183,7 +173,6 @@ export default function Funder({ wallet, projects, setProjects }) {
     <Wrap>
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
-      {/* Sending overlay */}
       {sending && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: '#0f1520', border: '1px solid rgba(0,229,255,0.3)', borderRadius: '16px', padding: '2.5rem 3rem', textAlign: 'center', maxWidth: '320px' }}>
@@ -194,7 +183,6 @@ export default function Funder({ wallet, projects, setProjects }) {
         </div>
       )}
 
-      {/* Fund confirmation modal */}
       {fundModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div style={{ background: '#0f1520', border: '1px solid rgba(0,229,255,0.25)', borderRadius: '20px', padding: '2rem', maxWidth: '420px', width: '100%', animation: 'fadeUp 0.3s ease both' }}>
@@ -209,16 +197,10 @@ export default function Funder({ wallet, projects, setProjects }) {
               Freighter will open to confirm. Make sure your wallet is unlocked and set to Testnet.
             </div>
             <div style={{ display: 'flex', gap: '0.8rem' }}>
-              <button
-                onClick={() => setFundModal(null)}
-                style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'transparent', border: '1px solid #1e2d45', color: '#5a7090', fontWeight: 700, fontFamily: 'Syne, sans-serif', cursor: 'pointer' }}
-              >
+              <button onClick={() => setFundModal(null)} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'transparent', border: '1px solid #1e2d45', color: '#5a7090', fontWeight: 700, fontFamily: 'Syne, sans-serif', cursor: 'pointer' }}>
                 Cancel
               </button>
-              <button
-                onClick={confirmFund}
-                style={{ flex: 2, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(0,229,255,0.1))', border: '1px solid rgba(16,185,129,0.4)', color: '#10b981', fontWeight: 700, fontFamily: 'Syne, sans-serif', cursor: 'pointer', fontSize: '0.95rem' }}
-              >
+              <button onClick={confirmFund} style={{ flex: 2, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(0,229,255,0.1))', border: '1px solid rgba(16,185,129,0.4)', color: '#10b981', fontWeight: 700, fontFamily: 'Syne, sans-serif', cursor: 'pointer' }}>
                 Confirm & Send {fundModal.amount} XLM
               </button>
             </div>
@@ -239,20 +221,16 @@ export default function Funder({ wallet, projects, setProjects }) {
         )}
 
         <div style={{ display: 'flex', gap: '1.2rem', flexWrap: 'wrap' }}>
-          {/* Project list */}
           <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
             {pendingProjects.map(p => {
               const submitted = p.milestones.filter(m => m.status === 'submitted').length
               const approved = p.milestones.filter(m => m.status === 'approved').length
               const isSelected = selected?.id === p.id
               return (
-                <button
-                  key={p.id}
-                  onClick={() => setSelected(projects.find(x => x.id === p.id))}
-                  style={{ background: isSelected ? 'rgba(124,58,237,0.12)' : '#0f1520', border: `1px solid ${isSelected ? 'rgba(124,58,237,0.4)' : '#1e2d45'}`, borderRadius: '14px', padding: '1.1rem 1.2rem', textAlign: 'left', cursor: 'pointer', fontFamily: 'Syne, sans-serif', color: '#e8edf5', transition: 'all 0.2s' }}
-                >
+                <button key={p.id} onClick={() => setSelected(projects.find(x => x.id === p.id))}
+                  style={{ background: isSelected ? 'rgba(124,58,237,0.12)' : '#0f1520', border: `1px solid ${isSelected ? 'rgba(124,58,237,0.4)' : '#1e2d45'}`, borderRadius: '14px', padding: '1.1rem 1.2rem', textAlign: 'left', cursor: 'pointer', fontFamily: 'Syne, sans-serif', color: '#e8edf5', transition: 'all 0.2s' }}>
                   <div style={{ fontWeight: 700, marginBottom: '0.3rem', fontSize: '0.95rem' }}>{p.title}</div>
-                  {p.description && <div style={{ color: '#5a7090', fontSize: '0.8rem', marginBottom: '0.4rem', lineHeight: 1.4 }}>{p.description.slice(0, 60)}...</div>}
+                  {p.description && <div style={{ color: '#5a7090', fontSize: '0.8rem', marginBottom: '0.4rem' }}>{p.description.slice(0, 60)}...</div>}
                   <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.72rem', color: '#5a7090', display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
                     <span style={{ color: '#f59e0b' }}>{submitted} pending</span>
                     <span style={{ color: '#10b981' }}>{approved}/{p.milestones.length} done</span>
@@ -263,14 +241,11 @@ export default function Funder({ wallet, projects, setProjects }) {
             })}
           </div>
 
-          {/* Detail panel */}
           {selected && (
             <div style={{ flex: '2 1 340px', animation: 'fadeUp 0.35s ease both' }}>
               <div style={{ background: '#0f1520', border: '1px solid #1e2d45', borderRadius: '16px', padding: '1.5rem' }}>
                 <div style={{ fontWeight: 800, fontSize: '1.2rem', marginBottom: '0.3rem' }}>{selected.title}</div>
-                {selected.description && (
-                  <div style={{ color: '#5a7090', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '0.8rem' }}>{selected.description}</div>
-                )}
+                {selected.description && <div style={{ color: '#5a7090', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '0.8rem' }}>{selected.description}</div>}
                 {selected.projectUrl && (
                   <a href={selected.projectUrl} target="_blank" rel="noreferrer" style={{ color: '#00e5ff', fontSize: '0.8rem', fontFamily: 'DM Mono, monospace', textDecoration: 'none', display: 'inline-block', marginBottom: '0.8rem', borderBottom: '1px dashed #00e5ff44' }}>
                     🔗 {selected.projectUrl}
@@ -284,14 +259,9 @@ export default function Funder({ wallet, projects, setProjects }) {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {projects.find(p => p.id === selected.id)?.milestones.map((m, i) => (
-                    <MilestoneCard
-                      key={i}
-                      milestone={m}
-                      index={i}
-                      isFunder={true}
+                    <MilestoneCard key={i} milestone={m} index={i} isFunder={true}
                       onApprove={() => handleApprove(selected.id, i)}
-                      onReject={() => reject(selected.id, i)}
-                    />
+                      onReject={() => reject(selected.id, i)} />
                   ))}
                 </div>
               </div>
