@@ -103,3 +103,4 @@ export default function WalletButton({ wallet, setWallet }) {
     </div>
   )
 }
+Object.keys(window).filter(k => k.includes('eight') || k.includes('reigh'))

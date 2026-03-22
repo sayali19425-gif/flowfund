@@ -1,15 +1,15 @@
 :root {
-  --bg: #080b10;
-  --surface: #0f1520;
-  --surface2: #161e2e;
-  --border: #1e2d45;
-  --accent: #00e5ff;
-  --accent2: #7c3aed;
+  --bg: #05000f;
+  --surface: #0d0020;
+  --surface2: #12002d;
+  --border: #1a0040;
+  --accent: #a855f7;
+  --accent2: #ec4899;
   --gold: #f59e0b;
   --green: #10b981;
   --red: #ef4444;
-  --text: #e8edf5;
-  --muted: #5a7090;
+  --text: #faf5ff;
+  --muted: #6b7280;
   --font: 'Syne', sans-serif;
   --mono: 'DM Mono', monospace;
 }
@@ -29,8 +29,8 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(0,229,255,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 80% 80%, rgba(124,58,237,0.08) 0%, transparent 60%);
+    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(168,85,247,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 80%, rgba(236,72,153,0.08) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
