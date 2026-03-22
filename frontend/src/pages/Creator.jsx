@@ -48,23 +48,61 @@ export default function Creator({ wallet, projects, setProjects }) {
     showToast('Project created successfully!')
   }
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    if (file.size > 500 * 1024) { showToast('Image too large! Use image under 500KB', 'error'); e.target.value = ''; return }
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      try {
-        const photo = ev.target.result
-        const mIdx = pendingMilestoneIdx
-        setProjects(ps => ps.map(p => p.id !== activeProject.id ? p : { ...p, milestones: p.milestones.map((m, i) => i !== mIdx ? m : { ...m, status: 'submitted', photo }) }))
-        setActiveProject(prev => ({ ...prev, milestones: prev.milestones.map((m, i) => i !== mIdx ? m : { ...m, status: 'submitted', photo }) }))
-        showToast('Milestone submitted for funder review!')
-      } catch (err) { showToast('Failed to upload. Try smaller image.', 'error') }
-    }
-    reader.readAsDataURL(file)
+  const handleFileChange = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  if (file.size > 500 * 1024) {
+    showToast('Image too large! Use image under 500KB', 'error')
     e.target.value = ''
+    return
   }
+
+  const reader = new FileReader()
+  reader.onload = async (ev) => {
+    try {
+      const photo = ev.target.result
+      const mIdx = pendingMilestoneIdx
+
+      // Update local state with photo
+      setProjects(ps => ps.map(p => {
+        if (p.id !== activeProject.id) return p
+        return {
+          ...p,
+          milestones: p.milestones.map((m, i) =>
+            i !== mIdx ? m : { ...m, status: 'submitted', photo }
+          )
+        }
+      }))
+
+      setActiveProject(prev => ({
+        ...prev,
+        milestones: prev.milestones.map((m, i) =>
+          i !== mIdx ? m : { ...m, status: 'submitted', photo }
+        )
+      }))
+
+      // Save photo to Supabase directly
+      const { supabase } = await import('../supabase')
+      const currentProject = projects.find(p => p.id === activeProject.id)
+      if (currentProject) {
+        const updatedMilestones = currentProject.milestones.map((m, i) =>
+          i !== mIdx ? m : { ...m, status: 'submitted', photo }
+        )
+        await supabase
+          .from('projects')
+          .update({ milestones: updatedMilestones })
+          .eq('id', activeProject.id)
+      }
+
+      showToast('Milestone submitted for funder review!')
+    } catch (err) {
+      console.error('Upload error:', err)
+      showToast('Failed to upload. Try smaller image.', 'error')
+    }
+  }
+  reader.readAsDataURL(file)
+  e.target.value = ''
+}
 
   const openFilePicker = (index) => { setPendingMilestoneIdx(index); setTimeout(() => fileRef.current.click(), 100) }
   const currentProject = activeProject ? projects.find(p => p.id === activeProject.id) || activeProject : null

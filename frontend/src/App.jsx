@@ -51,34 +51,32 @@ export default function App() {
   }, [])
 
   const loadProjects = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('id', { ascending: false })
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .order('id', { ascending: false })
 
-      if (error) {
-        console.error('Load error:', error)
-        return
-      }
+    if (error) { console.error('Load error:', error); return }
 
-      // Convert snake_case to camelCase
-      const formatted = (data || []).map(p => ({
-        ...p,
-        totalXLM: p.total_xlm,
-        projectUrl: p.project_url,
-        completedAt: p.completed_at,
-        createdAt: p.created_at,
-        milestones: p.milestones || [],
-      }))
+    const formatted = (data || []).map(p => ({
+      ...p,
+      totalXLM: p.total_xlm,
+      projectUrl: p.project_url,
+      completedAt: p.completed_at,
+      createdAt: p.created_at,
+      milestones: typeof p.milestones === 'string'
+        ? JSON.parse(p.milestones)
+        : p.milestones || [],
+    }))
 
-      setProjectsState(formatted)
-    } catch (err) {
-      console.error('Load error:', err)
-    } finally {
-      setLoading(false)
-    }
+    setProjectsState(formatted)
+  } catch (err) {
+    console.error('Load error:', err)
+  } finally {
+    setLoading(false)
   }
+}
 
   // Merge photos from memory into projects
   const projectsWithPhotos = projects.map(p => ({
