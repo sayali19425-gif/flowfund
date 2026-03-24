@@ -38,30 +38,19 @@ FlowFund addresses this problem by introducing a **milestone-based funding platf
 
 ## 👥 Testnet User Wallet Addresses
 
-All transactions verifiable on [Stellar Testnet Explorer](https://stellar.expert/explorer/testnet)
+All transactions verifiable on testnet 
 
-| # | Role | Wallet Address | Explorer Link |
-|---|---|---|---|
-| 1 | Funder | 
-sayali19425@gmail.com`GCMAVWID35TS7SFMSSYFEGJ2R42KSCUKKYH62H6JHPE3UDLT65DPLIS3` | [View ↗(https://stellar.expert/explorer/testnet/account/GCMAVWID35TS7SFMSSYFEGJ2R42KSCUKKYH62H6JHPE3UDLT65DPLIS3) |
-| 2 | Creator | 
-rutvikghadge933@gamil.com
-`GD5B3XLT2WRSACEFMQP35MYWRIMGK3HIJVIRFL6A4KOXFSSH5XJYFTVS` | [View ↗](https://stellar.expert/explorer/testnet/account/GD5B3XLT2WRSACEFMQP35MYWRIMGK3HIJVIRFL6A4KOXFSSH5XJYFTVS) |
-| 3 | Creator | 
-sanikanaikare19@gmail.com 
-`GDGFJBGBADBOM6Z3BNGENHEBRIX2E6XUXVCCZ2OKH6GOFUE2USZUQNDU` | [View ↗](https://stellar.expert/explorer/testnet/account/GDGFJBGBADBOM6Z3BNGENHEBRIX2E6XUXVCCZ2OKH6GOFUE2USZUQNDU) |
-| 4 | Creator | 
-maubunny0524@gamil.com
-`GCTQ2N6VIM3DYHMMHU2TGLIOSWWD7PXNNONSGDPUA4M7ZYZ6ZURATV3X` | [View ↗](https://stellar.expert/explorer/testnet/account/GCTQ2N6VIM3DYHMMHU2TGLIOSWWD7PXNNONSGDPUA4M7ZYZ6ZURATV3X) |
-| 5 | Creator | 
-kobalpriya1@gmail.com 
-`GB7OO2BO2HEE4R2IQINIECMVEXRUISKX3TNN2LHY4BIW3WS7GNETKI2R` | [View ↗](https://stellar.expert/explorer/testnet/account/GB7OO2BO2HEE4R2IQINIECMVEXRUISKX3TNN2LHY4BIW3WS7GNETKI2R) |
-| 6 | Creator | 
-radhamane01933@gmail.com
-`GC5YOINWNQMJUPYS5NJHNXI262WVPLMI5CNE6KBZCA67DWHF77WF7NML` | [View ↗](https://stellar.expert/explorer/testnet/account/GC5YOINWNQMJUPYS5NJHNXI262WVPLMI5CNE6KBZCA67DWHF77WF7NML) |
-| 7 | Creator | 
-sayalin2006@gmail.com 
-`GDZ46AZQNIYM2LZCO2P2JY4E6EQTUI6O52LGFLPWVN4QXIXJMRRO7HVZ` | [View ↗](https://stellar.expert/explorer/testnet/account/GDZ46AZQNIYM2LZCO2P2JY4E6EQTUI6O52LGFLPWVN4QXIXJMRRO7HVZ) |
+---## 👥 Project Participants
+
+| # | Role    | Email ID                     | Wallet Address                                                                 | Explorer Link |
+|---|---------|-----------------------------|---------------------------------------------------------------------------------|--------------|
+| 1 | Funder  | sayali19425@gmail.com       | `GCMAVWID35TS7SFMSSYFEGJ2R42KSCUKKYH62H6JHPE3UDLT65DPLIS3`                      | [View ↗](https://stellar.expert/explorer/testnet/account/GCMAVWID35TS7SFMSSYFEGJ2R42KSCUKKYH62H6JHPE3UDLT65DPLIS3) |
+| 2 | Creator | rutvikghadge933@gmail.com   | `GD5B3XLT2WRSACEFMQP35MYWRIMGK3HIJVIRFL6A4KOXFSSH5XJYFTVS`                      | [View ↗](https://stellar.expert/explorer/testnet/account/GD5B3XLT2WRSACEFMQP35MYWRIMGK3HIJVIRFL6A4KOXFSSH5XJYFTVS) |
+| 3 | Creator | sanikanaikare19@gmail.com   | `GDGFJBGBADBOM6Z3BNGENHEBRIX2E6XUXVCCZ2OKH6GOFUE2USZUQNDU`                      | [View ↗](https://stellar.expert/explorer/testnet/account/GDGFJBGBADBOM6Z3BNGENHEBRIX2E6XUXVCCZ2OKH6GOFUE2USZUQNDU) |
+| 4 | Creator | maubunny0524@gmail.com      | `GCTQ2N6VIM3DYHMMHU2TGLIOSWWD7PXNNONSGDPUA4M7ZYZ6ZURATV3X`                      | [View ↗](https://stellar.expert/explorer/testnet/account/GCTQ2N6VIM3DYHMMHU2TGLIOSWWD7PXNNONSGDPUA4M7ZYZ6ZURATV3X) |
+| 5 | Creator | kobalpriya1@gmail.com       | `GB7OO2BO2HEE4R2IQINIECMVEXRUISKX3TNN2LHY4BIW3WS7GNETKI2R`                      | [View ↗](https://stellar.expert/explorer/testnet/account/GB7OO2BO2HEE4R2IQINIECMVEXRUISKX3TNN2LHY4BIW3WS7GNETKI2R) |
+| 6 | Creator | radhamane01933@gmail.com    | `GC5YOINWNQMJUPYS5NJHNXI262WVPLMI5CNE6KBZCA67DWHF77WF7NML`                      | [View ↗](https://stellar.expert/explorer/testnet/account/GC5YOINWNQMJUPYS5NJHNXI262WVPLMI5CNE6KBZCA67DWHF77WF7NML) |
+| 7 | Creator | sayalin2006@gmail.com       | `GDZ46AZQNIYM2LZCO2P2JY4E6EQTUI6O52LGFLPWVN4QXIXJMRRO7HVZ`                      | [View ↗](https://stellar.expert/explorer/testnet/account/GDZ46AZQNIYM2LZCO2P2JY4E6EQTUI6O52LGFLPWVN4QXIXJMRRO7HVZ) |
 
 ---
 
