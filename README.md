@@ -43,8 +43,7 @@ All transactions verifiable on [Stellar Testnet Explorer](https://stellar.expert
 | # | Role | Wallet Address | Explorer Link |
 |---|---|---|---|
 | 1 | Funder | 
-sayali19425@gmail.com
-`GCMAVWID35TS7SFMSSYFEGJ2R42KSCUKKYH62H6JHPE3UDLT65DPLIS3` | [View ↗](https://stellar.expert/explorer/testnet/account/GCMAVWID35TS7SFMSSYFEGJ2R42KSCUKKYH62H6JHPE3UDLT65DPLIS3) |
+sayali19425@gmail.com`GCMAVWID35TS7SFMSSYFEGJ2R42KSCUKKYH62H6JHPE3UDLT65DPLIS3` | [View ↗(https://stellar.expert/explorer/testnet/account/GCMAVWID35TS7SFMSSYFEGJ2R42KSCUKKYH62H6JHPE3UDLT65DPLIS3) |
 | 2 | Creator | 
 rutvikghadge933@gamil.com
 `GD5B3XLT2WRSACEFMQP35MYWRIMGK3HIJVIRFL6A4KOXFSSH5XJYFTVS` | [View ↗](https://stellar.expert/explorer/testnet/account/GD5B3XLT2WRSACEFMQP35MYWRIMGK3HIJVIRFL6A4KOXFSSH5XJYFTVS) |
