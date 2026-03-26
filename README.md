@@ -49,6 +49,14 @@ FlowFund addresses this problem by introducing a **milestone-based funding platf
 
 All transactions verifiable on testnet 
 
+## User Feedback: : Fixed ✅
+
+User : Priya Kobal
+Feedback : I suggest you to add history section in your web. to see all the projects, i think it makes your web complete 
+
+<img width="1913" height="863" alt="image" src="https://github.com/user-attachments/assets/d89b8da7-d7ce-4ba0-b391-6881f1f767b4" />
+
+
 ---## 👥 Project Participants
 
 | # | Role    | Email ID                     | Wallet Address                                                                 | Explorer Link |
