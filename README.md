@@ -52,7 +52,7 @@ All transactions verifiable on testnet
 ## User Feedback: : Fixed ✅
 
 User : Priya Kobal
-Feedback : I suggest you to add history section in your web. to see all the projects, i think it makes your web complete 
+Feedback : I think you have to add history table so users can see how many projects is created on your website , or it may also help to keep record 
 
 <img width="1913" height="863" alt="image" src="https://github.com/user-attachments/assets/d89b8da7-d7ce-4ba0-b391-6881f1f767b4" />
 
